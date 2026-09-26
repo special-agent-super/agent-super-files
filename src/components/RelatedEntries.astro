@@ -1,0 +1,51 @@
+---
+import { getEntries } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  related: CollectionEntry<'entries'>['data']['related'];
+}
+
+const { related } = Astro.props;
+
+const entries =
+  related.length > 0
+    ? await getEntries(related)
+    : [];
+
+function entryUrl(entry: CollectionEntry<'entries'>) {
+  const section =
+    entry.data.kind === 'file'
+      ? 'files'
+      : entry.data.kind === 'note'
+      ? 'notes'
+      : 'artifacts';
+
+  return `/${section}/${entry.id}/`;
+}
+
+function archiveNumber(entry: CollectionEntry<'entries'>) {
+  if (entry.data.fileNo === undefined) return null;
+
+  return String(entry.data.fileNo).padStart(4, '0');
+}
+---
+
+{entries.length > 0 && (
+  <aside>
+    <h2>Related</h2>
+
+    <ul>
+      {entries.map((entry) => (
+        <li>
+          <span>{entry.data.kind.toUpperCase()}</span>
+          {' '}
+          <a href={entryUrl(entry)}>
+            {archiveNumber(entry) && `${archiveNumber(entry)} · `}
+            {entry.data.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}

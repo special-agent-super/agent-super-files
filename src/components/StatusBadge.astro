@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Status = CollectionEntry<'entries'>['data']['status'];
+
+interface Props {
+  status: Status;
+}
+
+const { status } = Astro.props;
+---
+
+<span class={`status status--${status}`}>
+  {status.toUpperCase()}
+</span>
+
+<style>
+  .status {
+    display: inline-block;
+    padding: 0.15em 0.45em;
+    border: 1px solid currentColor;
+    font-family: monospace;
+    font-size: 0.8em;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+</style>

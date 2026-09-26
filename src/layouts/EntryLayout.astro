@@ -1,0 +1,128 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import StatusBadge from '../components/StatusBadge.astro';
+import RelatedEntries from '../components/RelatedEntries.astro';
+import { slugify } from '../utils/slugs';
+
+interface Props {
+  entry: CollectionEntry<'entries'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+
+const archiveNumber =
+  data.fileNo !== undefined
+    ? String(data.fileNo).padStart(4, '0')
+    : null;
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>{data.title} — Agent Super Files</title>
+    <meta name="description" content={data.description} />
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <p>
+          {data.kind.toUpperCase()}
+          {archiveNumber && ` ${archiveNumber}`}
+        </p>
+
+        <h1>{data.title}</h1>
+
+        <p>{data.description}</p>
+
+        <dl>
+          <dt>Status</dt>
+          <dd><StatusBadge status={data.status} /></dd>
+
+          {data.format && (
+            <>
+              <dt>Format</dt>
+              <dd>{data.format}</dd>
+            </>
+          )}
+
+          <dt>Published</dt>
+          <dd>{formatDate(data.published)}</dd>
+
+          {data.updated && (
+            <>
+              <dt>Updated</dt>
+              <dd>{formatDate(data.updated)}</dd>
+            </>
+          )}
+
+          {data.artists.length > 0 && (
+            <>
+              <dt>Artists</dt>
+              <dd>
+                {data.artists.map((artist, index) => (
+                  <>
+                    {index > 0 && ', '}
+                    <a href={`/artists/${slugify(artist)}/`}>{artist}</a>
+                  </>
+                ))}
+              </dd>
+            </>
+          )}
+
+          {data.years.length > 0 && (
+            <>
+              <dt>Years</dt>
+              <dd>{data.years.join(', ')}</dd>
+            </>
+          )}
+
+          {data.labels.length > 0 && (
+            <>
+              <dt>Labels</dt>
+              <dd>{data.labels.join(', ')}</dd>
+            </>
+          )}
+
+          {data.scenes.length > 0 && (
+            <>
+              <dt>Scenes</dt>
+              <dd>{data.scenes.join(', ')}</dd>
+            </>
+          )}
+
+          {data.topics.length > 0 && (
+            <>
+              <dt>Topics</dt>
+              <dd>
+                {data.topics.map((topic, index) => (
+                  <>
+                    {index > 0 && ', '}
+                    <a href={`/topics/${slugify(topic)}/`}>{topic}</a>
+                  </>
+                ))}
+              </dd>
+            </>
+          )}
+        </dl>
+      </header>
+
+      <article>
+        <slot />
+      </article>
+
+      <RelatedEntries related={data.related} />
+    </main>
+  </body>
+</html>

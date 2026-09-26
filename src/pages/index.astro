@@ -1,17 +1,191 @@
 ---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import StatusBadge from '../components/StatusBadge.astro';
 
+const entries = await getCollection(
+  'entries',
+  ({ data }) => !data.draft
+);
+
+const byPublishedDesc = [...entries].sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime()
+);
+
+const featuredFiles = entries
+  .filter(
+    (entry) =>
+      entry.data.kind === 'file' &&
+      entry.data.featured
+  )
+  .sort(
+    (a, b) =>
+      (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0)
+  );
+
+const openCases = entries
+  .filter(
+    (entry) =>
+      entry.data.kind === 'file' &&
+      entry.data.status === 'open'
+  )
+  .sort(
+    (a, b) =>
+      (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0)
+  );
+
+const latestAdditions = byPublishedDesc.slice(0, 8);
+
+const counts = {
+  files: entries.filter((entry) => entry.data.kind === 'file').length,
+  notes: entries.filter((entry) => entry.data.kind === 'note').length,
+  artifacts: entries.filter((entry) => entry.data.kind === 'artifact').length,
+};
+
+function entryUrl(entry: CollectionEntry<'entries'>) {
+  const section =
+    entry.data.kind === 'file'
+      ? 'files'
+      : entry.data.kind === 'note'
+      ? 'notes'
+      : 'artifacts';
+
+  return `/${section}/${entry.id}/`;
+}
+
+function archiveNumber(entry: CollectionEntry<'entries'>) {
+  if (entry.data.fileNo === undefined) return null;
+
+  return String(entry.data.fileNo).padStart(4, '0');
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+  }).format(date).toUpperCase();
+}
 ---
 
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>Agent Super Files</title>
+
+    <meta
+      name="description"
+      content="An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research."
+    />
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <h1>Agent Super Files</h1>
+
+        <p>
+          An irregular archive of electronic music,<br />
+          lost recordings, obscure releases<br />
+          and unnecessary research.
+        </p>
+
+        <nav>
+          <a href="/files/">Files</a>
+          {' · '}
+          <a href="/notes/">Notes</a>
+          {' · '}
+          <a href="/artifacts/">Artifacts</a>
+        </nav>
+      </header>
+
+      <section>
+        <h2>Featured Files</h2>
+
+        {featuredFiles.length === 0 ? (
+          <p>No featured files yet.</p>
+        ) : (
+          <ul>
+            {featuredFiles.map((entry) => (
+              <li>
+                <a href={entryUrl(entry)}>
+                  {archiveNumber(entry) && `${archiveNumber(entry)} · `}
+                  {entry.data.title}
+                </a>
+                {' '}
+                <StatusBadge status={entry.data.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2>Open Cases</h2>
+
+        {openCases.length === 0 ? (
+          <p>No open cases.</p>
+        ) : (
+          <ul>
+            {openCases.map((entry) => (
+              <li>
+                <a href={entryUrl(entry)}>
+                  {archiveNumber(entry) && `${archiveNumber(entry)} · `}
+                  {entry.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2>Latest Additions</h2>
+
+        {latestAdditions.length === 0 ? (
+          <p>No entries yet.</p>
+        ) : (
+          <ul>
+            {latestAdditions.map((entry) => (
+              <li>
+                {formatDate(entry.data.published)}
+                {' · '}
+                {entry.data.kind.toUpperCase()}
+                {' · '}
+                <a href={entryUrl(entry)}>
+                  {entry.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2>Browse the Archive</h2>
+
+        <ul>
+          <li>
+            <a href="/files/">Files</a>
+            {' · '}
+            {counts.files}
+          </li>
+
+          <li>
+            <a href="/notes/">Notes</a>
+            {' · '}
+            {counts.notes}
+          </li>
+
+          <li>
+            <a href="/artifacts/">Artifacts</a>
+            {' · '}
+            {counts.artifacts}
+          </li>
+        </ul>
+      </section>
+    </main>
+  </body>
 </html>

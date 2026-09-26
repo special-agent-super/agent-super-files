@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import { slugify } from '../../utils/slugs';
+
+export async function getStaticPaths() {
+  const entries = await getCollection(
+    'entries',
+    ({ data }) => !data.draft
+  );
+
+  const topics = new Map<string, string>();
+
+  for (const entry of entries) {
+    for (const topic of entry.data.topics) {
+      topics.set(slugify(topic), topic);
+    }
+  }
+
+  return [...topics.entries()].map(([slug, topic]) => ({
+    params: {
+      topic: slug,
+    },
+    props: {
+      topic,
+    },
+  }));
+}
+
+const { topic } = Astro.props;
+
+const entries = (await getCollection(
+  'entries',
+  ({ data }) =>
+    !data.draft &&
+    data.topics.some(
+      (entryTopic) => slugify(entryTopic) === slugify(topic)
+    )
+)).sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime()
+);
+
+function entryUrl(entry: CollectionEntry<'entries'>) {
+  const section =
+    entry.data.kind === 'file'
+      ? 'files'
+      : entry.data.kind === 'note'
+      ? 'notes'
+      : 'artifacts';
+
+  return `/${section}/${entry.id}/`;
+}
+
+function archiveNumber(entry: CollectionEntry<'entries'>) {
+  if (entry.data.fileNo === undefined) return null;
+
+  return String(entry.data.fileNo).padStart(4, '0');
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>{topic} — Agent Super Files</title>
+  </head>
+
+  <body>
+    <main>
+      <p>TOPIC</p>
+      <h1>{topic}</h1>
+
+      <p>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</p>
+
+      <ul>
+        {entries.map((entry) => (
+          <li>
+            {entry.data.kind.toUpperCase()}
+            {' '}
+            <a href={entryUrl(entry)}>
+              {archiveNumber(entry) && `${archiveNumber(entry)} · `}
+              {entry.data.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  </body>
+</html>
