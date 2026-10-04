@@ -1,0 +1,50 @@
+name: Publish Agent Super Files
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Build Astro site
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to REG.RU
+        env:
+          ASF_DEPLOY_KEY: ${{ secrets.ASF_DEPLOY_KEY }}
+          ASF_KNOWN_HOSTS: ${{ secrets.ASF_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$ASF_DEPLOY_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$ASF_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+          rsync -az --delete \
+            --exclude='.well-known/' \
+            --exclude='.htaccess' \
+            -e "ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            dist/ \
+            u3670014@37.140.192.53:/var/www/u3670014/data/www/agentsuperfiles.com/
