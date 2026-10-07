@@ -28,101 +28,594 @@ const formatDate = (date: Date) =>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>{data.title} — Agent Super Files</title>
     <meta name="description" content={data.description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
-    <main>
-      <header>
-        <p>
-          {data.kind.toUpperCase()}
-          {archiveNumber && ` ${archiveNumber}`}
-        </p>
+    <div class="page">
 
-        <h1>{data.title}</h1>
+      <div class="topline">
+        <a href="/" class="mark">ASF</a>
+        <span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span>
+        <span>LOST RECORDINGS / OBSCURE RELEASES / UNNECESSARY RESEARCH</span>
+      </div>
 
-        <p>{data.description}</p>
+      <header class="site-header">
+        <a href="/" class="site-title">AGENT SUPER FILES</a>
 
-        <dl>
-          <dt>Status</dt>
-          <dd><StatusBadge status={data.status} /></dd>
-
-          {data.format && (
-            <>
-              <dt>Format</dt>
-              <dd>{data.format}</dd>
-            </>
-          )}
-
-          <dt>Published</dt>
-          <dd>{formatDate(data.published)}</dd>
-
-          {data.updated && (
-            <>
-              <dt>Updated</dt>
-              <dd>{formatDate(data.updated)}</dd>
-            </>
-          )}
-
-          {data.artists.length > 0 && (
-            <>
-              <dt>Artists</dt>
-              <dd>
-                {data.artists.map((artist, index) => (
-                  <>
-                    {index > 0 && ', '}
-                    <a href={`/artists/${slugify(artist)}/`}>{artist}</a>
-                  </>
-                ))}
-              </dd>
-            </>
-          )}
-
-          {data.years.length > 0 && (
-            <>
-              <dt>Years</dt>
-              <dd>{data.years.join(', ')}</dd>
-            </>
-          )}
-
-          {data.labels.length > 0 && (
-            <>
-              <dt>Labels</dt>
-              <dd>{data.labels.join(', ')}</dd>
-            </>
-          )}
-
-          {data.scenes.length > 0 && (
-            <>
-              <dt>Scenes</dt>
-              <dd>{data.scenes.join(', ')}</dd>
-            </>
-          )}
-
-          {data.topics.length > 0 && (
-            <>
-              <dt>Topics</dt>
-              <dd>
-                {data.topics.map((topic, index) => (
-                  <>
-                    {index > 0 && ', '}
-                    <a href={`/topics/${slugify(topic)}/`}>{topic}</a>
-                  </>
-                ))}
-              </dd>
-            </>
-          )}
-        </dl>
+        <nav aria-label="Main navigation">
+          <a href="/files/">FILES</a>
+          <a href="/notes/">NOTES</a>
+          <a href="/artifacts/">ARTIFACTS</a>
+        </nav>
       </header>
 
-      <article>
-        <slot />
-      </article>
+      <main>
 
-      <RelatedEntries related={data.related} />
-    </main>
+        <header class="entry-header">
+
+          <div class="entry-kicker">
+            <span>
+              {data.kind.toUpperCase()}
+              {archiveNumber && ` ${archiveNumber}`}
+            </span>
+
+            <StatusBadge status={data.status} />
+
+            {data.format && <span>{data.format.toUpperCase()}</span>}
+          </div>
+
+          <h1>{data.title}</h1>
+
+          <p class="dek">{data.description}</p>
+
+          <div class="entry-info">
+
+            <div class="entry-summary">
+              <div class="summary-label">ARCHIVE RECORD</div>
+
+              <div class="summary-number">
+                {archiveNumber ?? '—'}
+              </div>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Status</dt>
+                <dd>{data.status}</dd>
+              </div>
+
+              {data.format && (
+                <div>
+                  <dt>Format</dt>
+                  <dd>{data.format}</dd>
+                </div>
+              )}
+
+              <div>
+                <dt>Published</dt>
+                <dd>{formatDate(data.published)}</dd>
+              </div>
+
+              {data.updated && (
+                <div>
+                  <dt>Updated</dt>
+                  <dd>{formatDate(data.updated)}</dd>
+                </div>
+              )}
+
+              {data.artists.length > 0 && (
+                <div>
+                  <dt>Artists</dt>
+                  <dd>
+                    {data.artists.map((artist, index) => (
+                      <>
+                        {index > 0 && ', '}
+                        <a href={`/artists/${slugify(artist)}/`}>
+                          {artist}
+                        </a>
+                      </>
+                    ))}
+                  </dd>
+                </div>
+              )}
+
+              {data.years.length > 0 && (
+                <div>
+                  <dt>Years</dt>
+                  <dd>{data.years.join(', ')}</dd>
+                </div>
+              )}
+
+              {data.labels.length > 0 && (
+                <div>
+                  <dt>Labels</dt>
+                  <dd>{data.labels.join(', ')}</dd>
+                </div>
+              )}
+
+              {data.scenes.length > 0 && (
+                <div>
+                  <dt>Scenes</dt>
+                  <dd>{data.scenes.join(', ')}</dd>
+                </div>
+              )}
+
+              {data.topics.length > 0 && (
+                <div>
+                  <dt>Topics</dt>
+                  <dd>
+                    {data.topics.map((topic, index) => (
+                      <>
+                        {index > 0 && ', '}
+                        <a href={`/topics/${slugify(topic)}/`}>
+                          {topic}
+                        </a>
+                      </>
+                    ))}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </div>
+
+        </header>
+
+        <article class="article">
+          <slot />
+        </article>
+
+        <section class="related">
+          <div class="related-heading">
+            <span>RELATED MATERIAL</span>
+          </div>
+
+          <RelatedEntries related={data.related} />
+        </section>
+
+      </main>
+
+      <footer>
+        <span>AGENT SUPER FILES © {new Date().getFullYear()}</span>
+        <a href="/">INDEX</a>
+      </footer>
+
+    </div>
   </body>
 </html>
+
+<style>
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
+  :global(body) {
+    margin: 0;
+    background: #e9eae6;
+    color: #161715;
+    font-family: 'IBM Plex Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :global(a) {
+    color: inherit;
+  }
+
+  .page {
+    max-width: 1580px;
+    margin: 0 auto;
+    padding: 0 clamp(18px, 3vw, 48px);
+  }
+
+  .topline {
+    min-height: 37px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #30312e;
+    font-size: 9px;
+    letter-spacing: .055em;
+  }
+
+  .topline span:last-child {
+    margin-left: auto;
+  }
+
+  .mark {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .site-header {
+    min-height: 74px;
+    border-bottom: 3px double #343531;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .site-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 39px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.01em;
+    text-decoration: none;
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 32px;
+    font: 700 17px 'Barlow Condensed', sans-serif;
+  }
+
+  nav a {
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  .entry-header {
+    padding: clamp(34px, 6vw, 90px) 0 0;
+  }
+
+  .entry-kicker {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .entry-header h1 {
+    max-width: 1220px;
+    margin: 18px 0 20px;
+    font: 900 clamp(62px, 9vw, 148px)/.83 'Barlow Condensed', sans-serif;
+    letter-spacing: -.015em;
+    text-transform: uppercase;
+  }
+
+  .dek {
+    max-width: 850px;
+    margin: 0;
+    font: 400 clamp(22px, 2.4vw, 37px)/1.18 'Source Serif 4', Georgia, serif;
+    letter-spacing: -.025em;
+  }
+
+  .entry-info {
+    display: grid;
+    grid-template-columns: minmax(220px, .7fr) minmax(0, 2fr);
+    gap: 30px;
+    margin-top: clamp(40px, 6vw, 78px);
+    border-top: 1px solid #343531;
+    border-bottom: 1px solid #343531;
+  }
+
+  .entry-summary {
+    padding: 17px 20px 20px 0;
+    border-right: 1px solid #9d9f98;
+  }
+
+  .summary-label {
+    font-size: 10px;
+    margin-bottom: 18px;
+  }
+
+  .summary-number {
+    font: 900 clamp(70px, 10vw, 140px)/.75 'Barlow Condensed', sans-serif;
+    letter-spacing: -.05em;
+  }
+
+  dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  dl > div {
+    min-height: 90px;
+    padding: 15px 18px;
+    border-right: 1px solid #b6b7b1;
+    border-bottom: 1px solid #b6b7b1;
+  }
+
+  dl > div:nth-child(3n) {
+    border-right: 0;
+  }
+
+  dt {
+    margin-bottom: 9px;
+    color: #62645d;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+
+  dd a {
+    text-underline-offset: 3px;
+  }
+
+  .article {
+    max-width: 850px;
+    margin: clamp(55px, 8vw, 110px) auto;
+    font: 400 20px/1.62 'Source Serif 4', Georgia, serif;
+  }
+
+  .article :global(p) {
+    margin: 0 0 1.45em;
+  }
+
+  .article :global(h2) {
+    margin: 2.1em 0 .65em;
+    padding-top: .25em;
+    border-top: 1px solid #343531;
+    font: 900 clamp(38px, 5vw, 66px)/.92 'Barlow Condensed', sans-serif;
+    letter-spacing: -.025em;
+    text-transform: uppercase;
+  }
+
+  .article :global(h3) {
+    margin: 2em 0 .6em;
+    font: 800 34px/1 'Barlow Condensed', sans-serif;
+  }
+
+  .article :global(a) {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .article :global(blockquote) {
+    margin: 2.4em 0;
+    padding: 18px 0 18px 28px;
+    border-left: 4px solid #161715;
+    font-size: 28px;
+    line-height: 1.35;
+  }
+
+  .article :global(ul),
+  .article :global(ol) {
+    padding-left: 1.4em;
+    margin: 0 0 1.5em;
+  }
+
+  .article :global(li) {
+    margin-bottom: .45em;
+  }
+
+  .article :global(hr) {
+    border: 0;
+    border-top: 1px solid #343531;
+    margin: 3em 0;
+  }
+
+  .article :global(code) {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82em;
+    background: #d9dad4;
+    padding: .12em .3em;
+  }
+
+  .article :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 2.5em auto;
+  }
+
+  .article :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2.5em 0;
+    font: 12px/1.4 'IBM Plex Mono', monospace;
+  }
+
+  .article :global(th),
+  .article :global(td) {
+    padding: 10px;
+    border-top: 1px solid #9d9f98;
+    text-align: left;
+  }
+
+  .article :global(th) {
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+
+  .related {
+    margin-top: 90px;
+    padding-bottom: 60px;
+  }
+
+  .related-heading {
+    border-top: 3px double #343531;
+    border-bottom: 1px solid #9d9f98;
+    padding: 15px 0;
+    font: 900 35px 'Barlow Condensed', sans-serif;
+  }
+
+  footer {
+    min-height: 75px;
+    border-top: 2px solid #343531;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+  }
+
+  footer a {
+    text-decoration: none;
+  }
+
+  @media (max-width: 800px) {
+    .topline span:last-child {
+      display: none;
+    }
+
+    .site-header {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 0;
+    }
+
+    nav {
+      margin-left: 0;
+    }
+
+    .entry-header h1 {
+      font-size: clamp(54px, 17vw, 95px);
+    }
+
+    .entry-info {
+      grid-template-columns: 1fr;
+    }
+
+    .entry-summary {
+      border-right: 0;
+      border-bottom: 1px solid #9d9f98;
+    }
+
+    dl {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    dl > div:nth-child(3n) {
+      border-right: 1px solid #b6b7b1;
+    }
+
+    dl > div:nth-child(2n) {
+      border-right: 0;
+    }
+
+    .article {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .topline span {
+      display: none;
+    }
+
+    nav {
+      width: 100%;
+      overflow-x: auto;
+      gap: 24px;
+      white-space: nowrap;
+    }
+
+    dl {
+      grid-template-columns: 1fr;
+    }
+
+    dl > div {
+      border-right: 0 !important;
+    }
+
+    .dek {
+      font-size: 21px;
+    }
+  }
+
+/* --- proportion correction v2 --- */
+
+.entry-header {
+  padding-top: clamp(28px, 4vw, 56px);
+}
+
+.entry-header h1 {
+  max-width: 980px;
+  margin: 14px 0 16px;
+  font-size: clamp(54px, 6.3vw, 104px);
+  line-height: .88;
+}
+
+.dek {
+  max-width: 760px;
+  font-size: clamp(20px, 1.9vw, 30px);
+  line-height: 1.24;
+}
+
+.entry-info {
+  grid-template-columns: minmax(160px, .42fr) minmax(0, 2fr);
+  gap: 22px;
+  margin-top: clamp(30px, 4vw, 48px);
+}
+
+.entry-summary {
+  padding: 14px 16px 16px 0;
+}
+
+.summary-label {
+  margin-bottom: 12px;
+}
+
+.summary-number {
+  font-size: clamp(56px, 7vw, 92px);
+  line-height: .8;
+}
+
+dl > div {
+  min-height: 70px;
+  padding: 12px 14px;
+}
+
+.article {
+  max-width: 920px;
+  margin: clamp(42px, 6vw, 72px) auto;
+  font-size: 19px;
+  line-height: 1.56;
+}
+
+.article :global(p) {
+  margin-bottom: 1.2em;
+}
+
+.article :global(h2) {
+  margin: 1.65em 0 .5em;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: .95;
+}
+
+.article :global(h3) {
+  margin: 1.6em 0 .5em;
+  font-size: 29px;
+}
+
+.article :global(blockquote) {
+  margin: 1.8em 0;
+  font-size: 24px;
+}
+
+.related {
+  margin-top: 64px;
+  padding-bottom: 44px;
+}
+</style>

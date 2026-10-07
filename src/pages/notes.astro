@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import ArchiveIndexLayout from '../layouts/ArchiveIndexLayout.astro';
 
 const entries = await getCollection(
   'entries',
@@ -11,31 +12,9 @@ entries.sort(
 );
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Notes — Agent Super Files</title>
-  </head>
-
-  <body>
-    <main>
-      <h1>Notes</h1>
-
-      {entries.length === 0 ? (
-        <p>No notes yet.</p>
-      ) : (
-        <ul>
-          {entries.map((entry) => (
-            <li>
-              <a href={`/notes/${entry.id}/`}>
-                {entry.data.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
-  </body>
-</html>
+<ArchiveIndexLayout
+  title="Notes"
+  description="Fragments, observations, short entries and unfinished lines of inquiry."
+  entries={entries}
+  kind="note"
+/>

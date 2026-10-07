@@ -1,191 +1,217 @@
 ---
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import StatusBadge from '../components/StatusBadge.astro';
 
-const entries = await getCollection(
-  'entries',
-  ({ data }) => !data.draft
-);
-
-const byPublishedDesc = [...entries].sort(
-  (a, b) => b.data.published.getTime() - a.data.published.getTime()
-);
-
-const featuredFiles = entries
-  .filter(
-    (entry) =>
-      entry.data.kind === 'file' &&
-      entry.data.featured
-  )
-  .sort(
-    (a, b) =>
-      (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0)
-  );
-
-const openCases = entries
-  .filter(
-    (entry) =>
-      entry.data.kind === 'file' &&
-      entry.data.status === 'open'
-  )
-  .sort(
-    (a, b) =>
-      (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0)
-  );
-
-const latestAdditions = byPublishedDesc.slice(0, 8);
-
+// The homepage reads only published content. No changes to the content schema.
+type Entry = CollectionEntry<'entries'>;
+const entries = await getCollection('entries', ({ data }) => !data.draft);
+const latest = [...entries].sort((a, b) => b.data.published.getTime() - a.data.published.getTime()).slice(0, 8);
+const featured = entries.filter(e => e.data.kind === 'file' && e.data.featured)
+  .sort((a, b) => (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0));
+const open = entries.filter(e => e.data.kind === 'file' && e.data.status === 'open')
+  .sort((a, b) => (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0));
 const counts = {
-  files: entries.filter((entry) => entry.data.kind === 'file').length,
-  notes: entries.filter((entry) => entry.data.kind === 'note').length,
-  artifacts: entries.filter((entry) => entry.data.kind === 'artifact').length,
+  files: entries.filter(e => e.data.kind === 'file').length,
+  notes: entries.filter(e => e.data.kind === 'note').length,
+  artifacts: entries.filter(e => e.data.kind === 'artifact').length,
 };
-
-function entryUrl(entry: CollectionEntry<'entries'>) {
-  const section =
-    entry.data.kind === 'file'
-      ? 'files'
-      : entry.data.kind === 'note'
-      ? 'notes'
-      : 'artifacts';
-
-  return `/${section}/${entry.id}/`;
-}
-
-function archiveNumber(entry: CollectionEntry<'entries'>) {
-  if (entry.data.fileNo === undefined) return null;
-
-  return String(entry.data.fileNo).padStart(4, '0');
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-  }).format(date).toUpperCase();
-}
+const url = (e: Entry) => `/${e.data.kind === 'file' ? 'files' : e.data.kind === 'note' ? 'notes' : 'artifacts'}/${e.id}/`;
+const number = (e: Entry) => e.data.fileNo === undefined ? '' : String(e.data.fileNo).padStart(4, '0');
+const date = (d: Date) => new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + number(e) : ''}`;
 ---
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-
-    <title>Agent Super Files</title>
-
-    <meta
-      name="description"
-      content="An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research."
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research." />
+    <title>Agent Super Files — An Irregular Archive of Electronic Music</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet" />
   </head>
-
   <body>
-    <main>
-      <header>
-        <h1>Agent Super Files</h1>
-
-        <p>
-          An irregular archive of electronic music,<br />
-          lost recordings, obscure releases<br />
-          and unnecessary research.
-        </p>
-
-        <nav>
-          <a href="/files/">Files</a>
-          {' · '}
-          <a href="/notes/">Notes</a>
-          {' · '}
-          <a href="/artifacts/">Artifacts</a>
-        </nav>
+    <div class="page" id="top">
+      <div class="topline"><a href="/" class="mark">ASF</a><span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span><span>LOST RECORDINGS / OBSCURE RELEASES / UNNECESSARY RESEARCH</span></div>
+      <header class="masthead">
+        <div class="identity">
+          <a href="/" class="site-title">AGENT SUPER FILES</a>
+          <p>An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research.</p>
+        </div>
+        <div class="header-index" aria-label="Archive subjects">MUSIC<br />PEOPLE<br />PLACES<br />OBJECTS<br />CONTEXT<br />AND MORE</div>
+        <div class="header-note">INDEPENDENT ARCHIVE<br />EST. 2026<br /><br />CURIOUS BY DESIGN.</div>
       </header>
-
-      <section>
-        <h2>Featured Files</h2>
-
-        {featuredFiles.length === 0 ? (
-          <p>No featured files yet.</p>
-        ) : (
-          <ul>
-            {featuredFiles.map((entry) => (
-              <li>
-                <a href={entryUrl(entry)}>
-                  {archiveNumber(entry) && `${archiveNumber(entry)} · `}
-                  {entry.data.title}
-                </a>
-                {' '}
-                <StatusBadge status={entry.data.status} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2>Open Cases</h2>
-
-        {openCases.length === 0 ? (
-          <p>No open cases.</p>
-        ) : (
-          <ul>
-            {openCases.map((entry) => (
-              <li>
-                <a href={entryUrl(entry)}>
-                  {archiveNumber(entry) && `${archiveNumber(entry)} · `}
-                  {entry.data.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2>Latest Additions</h2>
-
-        {latestAdditions.length === 0 ? (
-          <p>No entries yet.</p>
-        ) : (
-          <ul>
-            {latestAdditions.map((entry) => (
-              <li>
-                {formatDate(entry.data.published)}
-                {' · '}
-                {entry.data.kind.toUpperCase()}
-                {' · '}
-                <a href={entryUrl(entry)}>
-                  {entry.data.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2>Browse the Archive</h2>
-
-        <ul>
-          <li>
-            <a href="/files/">Files</a>
-            {' · '}
-            {counts.files}
-          </li>
-
-          <li>
-            <a href="/notes/">Notes</a>
-            {' · '}
-            {counts.notes}
-          </li>
-
-          <li>
-            <a href="/artifacts/">Artifacts</a>
-            {' · '}
-            {counts.artifacts}
-          </li>
-        </ul>
-      </section>
-    </main>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="/files/">FILES</a><a href="/notes/">NOTES</a><a href="/artifacts/">ARTIFACTS</a>
+        <a href="#archive">BROWSE</a><a href="#latest">LATEST</a>
+        <span class="nav-end">INDEX / ASF</span>
+      </nav>
+      <main>
+        <div class="lead-grid">
+          <section class="section featured" aria-labelledby="featured-heading">
+            <div class="section-head"><span class="section-no">01</span><h2 id="featured-heading">FEATURED FILES</h2><p>IN-DEPTH RESEARCH, LOST RECORDINGS<br />AND OTHER CURIOSITIES.</p></div>
+            {featured.length ? (
+              <div class="featured-list">
+                {featured.slice(0, 2).map(e => (
+                  <a class="feature-entry" href={url(e)}>
+                    <div class="cover cover-large" aria-hidden="true"><span>ASF / {number(e) || 'FILE'}</span><strong>{e.data.title}</strong><small>AN ARCHIVE ITEM</small></div>
+                    <div class="feature-copy">
+                      <div class="eyebrow"><span>{label(e)}</span><span class="status">{e.data.status.toUpperCase()}</span></div>
+                      <h3>{e.data.title}</h3>
+                      <div class="entry-meta">{[e.data.format, ...e.data.scenes.slice(0, 2)].filter(Boolean).join(' / ') || e.data.kind}</div>
+                      <p class="description">{e.data.description}</p>
+                      <div class="feature-footer"><span>READ FILE</span><span aria-hidden="true">↗</span></div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : <p class="empty">NO FEATURED FILES YET.</p>}
+          </section>
+          <section class="section cases" aria-labelledby="cases-heading">
+            <div class="section-head"><span class="section-no">02</span><h2 id="cases-heading">OPEN CASES</h2><p>ONGOING RESEARCH AND<br />UNANSWERED QUESTIONS.</p></div>
+            {open.length ? (
+              <div class="case-grid">
+                {open.slice(0, 4).map(e => (
+                  <a class="case-entry" href={url(e)}>
+                    <div class="cover cover-small" aria-hidden="true"><span>ASF</span><strong>{number(e) || '—'}</strong></div>
+                    <div class="case-copy"><div class="eyebrow"><span>{label(e)}</span></div><h3>{e.data.title}</h3><div class="entry-meta">{e.data.format || 'RESEARCH'} / {e.data.status.toUpperCase()}</div><p>{e.data.description}</p><span class="read-link">READ CASE ↗</span></div>
+                  </a>
+                ))}
+              </div>
+            ) : <p class="empty">NO OPEN CASES AT THE MOMENT.</p>}
+          </section>
+        </div>
+        <section class="section latest" id="latest" aria-labelledby="latest-heading">
+          <div class="section-head"><span class="section-no">03</span><h2 id="latest-heading">LATEST ADDITIONS</h2><p>NEWLY ADDED TO THE ARCHIVE.</p><a class="section-more" href="#archive">BROWSE ALL ↗</a></div>
+          {latest.length ? (
+            <div class="table-wrap"><table><thead><tr><th scope="col">#</th><th scope="col">TITLE</th><th scope="col">TYPE</th><th scope="col">ARTIST / CREATOR</th><th scope="col">TOPICS</th><th scope="col">DATE</th><th scope="col"></th></tr></thead><tbody>
+              {latest.map(e => (<tr><td class="mono">{number(e) || '—'}</td><td><a class="entry-title" href={url(e)}>{e.data.title}</a></td><td>{e.data.kind}</td><td>{e.data.artists.join(', ') || '—'}</td><td>{e.data.topics.slice(0, 2).join(' / ') || '—'}</td><td class="mono">{date(e.data.published)}</td><td><a href={url(e)} aria-label={`Read ${e.data.title}`}>↗</a></td></tr>))}
+            </tbody></table></div>
+          ) : <p class="empty">NO ENTRIES YET.</p>}
+        </section>
+        <section class="section browse" id="archive" aria-labelledby="browse-heading">
+          <div class="section-head"><span class="section-no">04</span><h2 id="browse-heading">BROWSE THE ARCHIVE</h2><p>EXPLORE BY ENTRY TYPE.</p></div>
+          <div class="browse-grid">
+            <a href="/files/" class="browse-card"><div class="browse-visual files-visual"><span>01 / RESEARCH</span><strong>F</strong></div><div class="browse-bottom"><h3>FILES</h3><span>{counts.files}</span></div><p>Investigations, histories, mixes and long reads.</p><div class="browse-link">EXPLORE FILES ↗</div></a>
+            <a href="/notes/" class="browse-card"><div class="browse-visual notes-visual"><span>02 / FRAGMENTS</span><strong>N</strong></div><div class="browse-bottom"><h3>NOTES</h3><span>{counts.notes}</span></div><p>Observations, fragments and unfinished thoughts.</p><div class="browse-link">EXPLORE NOTES ↗</div></a>
+            <a href="/artifacts/" class="browse-card"><div class="browse-visual artifacts-visual"><span>03 / OBJECTS</span><strong>A</strong></div><div class="browse-bottom"><h3>ARTIFACTS</h3><span>{counts.artifacts}</span></div><p>Scans, ephemera, recordings and physical evidence.</p><div class="browse-link">EXPLORE ARTIFACTS ↗</div></a>
+          </div>
+        </section>
+      </main>
+      <footer><span>AGENT SUPER FILES © {new Date().getFullYear()}</span><span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span><a href="#top" >BACK TO TOP ↑</a></footer>
+    </div>
   </body>
 </html>
+<style>
+  :global(*){box-sizing:border-box}
+  :global(html){scroll-behavior:smooth}
+  :global(body){margin:0;background:#e9eae6;color:#161715;font-family:'IBM Plex Mono',monospace;-webkit-font-smoothing:antialiased}
+  :global(a){color:inherit}
+  :global(a:focus-visible){outline:3px solid #deec36;outline-offset:3px}
+  .page{max-width:1580px;margin:auto;padding:0 clamp(18px,3vw,48px)}
+  .topline{min-height:37px;border-bottom:1px solid #30312e;display:flex;align-items:center;gap:24px;font-size:9px;letter-spacing:.055em}
+  .topline span:last-child{margin-left:auto}.mark{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-decoration:none}
+  .masthead{display:grid;grid-template-columns:minmax(0,1fr) 132px 190px;gap:20px;border-bottom:1px solid #30312e;padding:13px 0 15px}
+  .site-title{display:block;font-family:'Barlow Condensed','Arial Narrow',Impact,sans-serif;font-weight:900;font-size:clamp(68px,8.7vw,148px);line-height:.82;letter-spacing:-.01em;text-decoration:none;white-space:nowrap;transform-origin:left center;transform:scaleX(.90);width:111%}
+  .identity{min-width:0;overflow:hidden}.identity p{font:16px/1.3 'Source Serif 4',Georgia,serif;margin:13px 0 0}
+  .header-index,.header-note{border-left:1px solid #8b8c88;padding:12px 0 0 16px;font-size:11px;line-height:1.37}
+  .header-note{border:1px solid #a3a49f;padding:12px;font-size:11px}
+  .nav{border-bottom:3px double #343531;min-height:53px;display:flex;align-items:center;gap:clamp(16px,3vw,42px);font:700 19px 'Barlow Condensed',sans-serif}
+  .nav a{text-decoration:none}.nav a:hover,.entry-title:hover{text-decoration:underline}.nav-end{margin-left:auto;font:10px 'IBM Plex Mono',monospace;letter-spacing:.08em}
+  .lead-grid{display:grid;grid-template-columns:1.06fr 1fr;gap:22px;margin-top:17px}
+  .section{border-top:1px solid #333531;min-width:0}.section-head{display:flex;align-items:end;gap:15px;padding:8px 0 12px;border-bottom:1px solid #989993;min-height:89px}
+  .section-no{color:#d43b23;align-self:flex-start;font:500 12px 'IBM Plex Mono',monospace;padding-top:3px}
+  h2{font:900 clamp(29px,3.35vw,57px)/.9 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.025em;margin:0;white-space:nowrap}
+  .section-head p{font-size:10px;line-height:1.35;margin:0 0 3px;color:#555750}
+  .feature-entry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:17px;text-decoration:none;padding:14px 0;border-bottom:1px solid #a1a29c}
+  .featured-list .feature-entry:last-child{border-bottom:0}
+  .cover{aspect-ratio:1;background:#20211e;color:#f0f0e9;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:13px}
+  .cover::before{content:'';position:absolute;inset:10%;border:1px solid #74766e;border-radius:50%;box-shadow:0 0 0 16px #292b26,0 0 0 17px #575a50,0 0 0 42px #22231f;pointer-events:none;opacity:.65}
+  .cover span,.cover small,.cover strong{position:relative;z-index:1}.cover span,.cover small{font-size:10px;letter-spacing:.09em}
+  .cover-large strong{font:800 clamp(26px,3.3vw,54px)/.95 'Barlow Condensed',sans-serif;text-transform:uppercase;overflow-wrap:anywhere}
+  .feature-copy{display:flex;flex-direction:column;min-width:0}.eyebrow{font-size:11px;display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .status{background:#deec36;padding:3px 6px;color:#171915}.feature-copy h3{font:700 clamp(27px,3.1vw,49px)/1 'Source Serif 4',Georgia,serif;letter-spacing:-.045em;margin:15px 0}
+  .entry-meta{font-size:10px;line-height:1.5;text-transform:uppercase;color:#5c5e57}.description{font:15px/1.45 'Source Serif 4',Georgia,serif;margin:14px 0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+  .feature-footer{margin-top:auto;padding-top:16px;font-size:12px;border-top:1px solid #b1b2ab;display:flex;justify-content:space-between;font-weight:600}
+  .feature-entry:hover h3,.case-entry:hover h3{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+  .case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.case-entry{display:grid;grid-template-columns:95px minmax(0,1fr);gap:11px;padding:15px 0;border-bottom:1px solid #a1a29c;text-decoration:none}
+  .cover-small{padding:7px}.cover-small span{font-size:9px}.cover-small strong{font:900 32px 'Barlow Condensed',sans-serif;align-self:flex-end}.case-copy h3{font:700 22px/1.04 'Barlow Condensed',sans-serif;margin:8px 0 7px}
+  .case-copy p{font:12px/1.35 'Source Serif 4',Georgia,serif;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin:9px 0}
+  .read-link{font-size:10px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .latest,.browse{margin-top:12px}.section-more{margin-left:auto;font-size:11px;white-space:nowrap}.table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;text-align:left;font-size:11px}th{color:#555750;font-size:10px;text-transform:uppercase;font-weight:500}th,td{padding:10px 11px;border-bottom:1px solid #b6b8b0}th:first-child,td:first-child{padding-left:0}
+  tbody tr:hover{background:#dfe0da}td{vertical-align:middle}.entry-title{font:500 13px 'IBM Plex Mono',monospace;text-decoration:none}.mono{white-space:nowrap}td:last-child{text-align:right;font-size:16px}
+  .browse-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;padding:15px 0 25px}.browse-card{text-decoration:none;min-width:0}
+  .browse-visual{aspect-ratio:1;position:relative;border:1px solid #777972;background:#d0d2cb;overflow:hidden;padding:11px;display:flex;flex-direction:column;justify-content:space-between}
+  .browse-visual span{font-size:11px;position:relative;z-index:1}.browse-visual strong{font:900 clamp(150px,24vw,360px)/.65 'Barlow Condensed',sans-serif;letter-spacing:-.09em;text-align:center;opacity:.92}
+  .files-visual{background:#232522;color:#f0f0e9}.notes-visual{background:#c7c8c0}.artifacts-visual{background:#bdc2c0}
+  .browse-bottom{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #9b9d96;padding:8px 0 4px}.browse-bottom h3{font:800 27px 'Barlow Condensed',sans-serif;margin:0}.browse-bottom span{font-size:12px}
+  .browse-card p{font:14px/1.3 'Source Serif 4',serif;min-height:38px;margin:9px 0}.browse-link{padding:9px 0;border-top:1px solid #b2b4ad;font-size:11px;text-decoration:underline}.browse-card:hover .browse-visual{outline:3px solid #deec36;outline-offset:-3px}
+  footer{border-top:2px solid #343531;display:flex;gap:22px;align-items:center;justify-content:space-between;font-size:10px;padding:18px 0 30px}footer a{text-decoration:none}.empty{font:12px 'IBM Plex Mono',monospace;padding:20px 0}
+  @media(max-width:1050px){.masthead{grid-template-columns:1fr 140px}.header-note{display:none}.site-title{font-size:clamp(60px,9.8vw,100px)}.lead-grid{grid-template-columns:1fr}.section-head p{margin-left:auto}.feature-entry{grid-template-columns:minmax(0,.65fr) minmax(0,1fr)}.case-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.page{padding:0 15px}.topline span:last-child,.header-index,.header-note,.nav-end{display:none}.masthead{display:block;padding:16px 0}.site-title{white-space:normal;font-size:clamp(58px,15vw,105px);line-height:.82;width:auto;transform:none;letter-spacing:-.01em}.identity p{font-size:13px;margin-top:11px}.nav{gap:23px;overflow-x:auto;white-space:nowrap;min-height:49px;font-size:17px}.section-head{flex-wrap:wrap;min-height:68px;gap:8px}.section-head p{display:none}.section-no{font-size:10px;margin-right:4px}h2{font-size:clamp(32px,9vw,55px)}.feature-entry{grid-template-columns:1fr;gap:12px}.cover-large{max-height:none}.cover-large strong{font-size:clamp(40px,10vw,72px)}.feature-copy h3{font-size:32px;margin:8px 0}.case-grid{grid-template-columns:1fr}.case-entry{grid-template-columns:90px 1fr}.browse-grid{grid-template-columns:1fr;gap:18px}.browse-visual{aspect-ratio:1}.browse-visual strong{font-size:280px}table{min-width:700px}footer span:nth-child(2){display:none}}
+/* compact Browse the Archive */
+
+.browse-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+  padding:0 0 25px;
+  border-top:1px solid #9b9d96;
+}
+
+.browse-card{
+  padding:18px 22px 16px;
+  border-right:1px solid #9b9d96;
+}
+
+.browse-card:first-child{
+  padding-left:0;
+}
+
+.browse-card:last-child{
+  border-right:0;
+  padding-right:0;
+}
+
+.browse-visual{
+  display:none;
+}
+
+.browse-bottom{
+  padding:0 0 7px;
+}
+
+.browse-bottom h3{
+  font-size:32px;
+}
+
+.browse-card p{
+  min-height:0;
+  margin:10px 0 18px;
+  max-width:360px;
+}
+
+.browse-link{
+  border-top:0;
+  padding:0;
+}
+
+.browse-card:hover{
+  background:#dfe0da;
+}
+
+@media(max-width:700px){
+  .browse-grid{
+    grid-template-columns:1fr;
+  }
+
+  .browse-card,
+  .browse-card:first-child,
+  .browse-card:last-child{
+    padding:16px 0;
+    border-right:0;
+    border-bottom:1px solid #9b9d96;
+  }
+}
+</style>

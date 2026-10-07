@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection(
+  'entries',
+  ({ data }) => !data.draft && data.kind === 'artifact'
+);
+
+entries.sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime()
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Artifacts — Agent Super Files</title>
+  </head>
+
+  <body>
+    <main>
+      <h1>Artifacts</h1>
+
+      {entries.length === 0 ? (
+        <p>No artifacts yet.</p>
+      ) : (
+        <ul>
+          {entries.map((entry) => (
+            <li>
+              <a href={`/artifacts/${entry.id}/`}>
+                {entry.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
+  </body>
+</html>

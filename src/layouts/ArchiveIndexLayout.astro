@@ -1,0 +1,520 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import StatusBadge from '../components/StatusBadge.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  entries: CollectionEntry<'entries'>[];
+  kind: 'file' | 'note' | 'artifact';
+}
+
+const { title, description, entries, kind } = Astro.props;
+
+function archiveNumber(entry: CollectionEntry<'entries'>) {
+  if (entry.data.fileNo === undefined) return null;
+  return String(entry.data.fileNo).padStart(4, '0');
+}
+
+function entryUrl(entry: CollectionEntry<'entries'>) {
+  const section =
+    entry.data.kind === 'file'
+      ? 'files'
+      : entry.data.kind === 'note'
+      ? 'notes'
+      : 'artifacts';
+
+  return `/${section}/${entry.id}/`;
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function placeholderLetter(entry: CollectionEntry<'entries'>) {
+  if (entry.data.kind === 'file') return 'F';
+  if (entry.data.kind === 'note') return 'N';
+  return 'A';
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{title} — Agent Super Files</title>
+    <meta name="description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="page">
+
+      <div class="topline">
+        <a href="/" class="mark">ASF</a>
+        <span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span>
+        <span>LOST RECORDINGS / OBSCURE RELEASES / UNNECESSARY RESEARCH</span>
+      </div>
+
+      <header class="site-header">
+        <a href="/" class="site-title">AGENT SUPER FILES</a>
+
+        <nav>
+          <a href="/files/" class={kind === 'file' ? 'active' : ''}>FILES</a>
+          <a href="/notes/" class={kind === 'note' ? 'active' : ''}>NOTES</a>
+          <a href="/artifacts/" class={kind === 'artifact' ? 'active' : ''}>ARTIFACTS</a>
+        </nav>
+      </header>
+
+      <main>
+        <header class="archive-header">
+          <div class="section-number">INDEX</div>
+
+          <div>
+            <h1>{title}</h1>
+            <p>{description}</p>
+          </div>
+
+          <div class="count">
+            <span>{String(entries.length).padStart(2, '0')}</span>
+            <small>ENTRIES</small>
+          </div>
+        </header>
+
+        {entries.length === 0 ? (
+          <div class="empty">
+            <span>NO ENTRIES YET.</span>
+          </div>
+        ) : (
+          <section class="entry-grid">
+            {entries.map((entry) => (
+              <article class="entry-card">
+
+                <a class="cover" href={entryUrl(entry)} aria-label={entry.data.title}>
+                  <span class="cover-meta">
+                    {archiveNumber(entry)
+                      ? `${entry.data.kind.toUpperCase()} ${archiveNumber(entry)}`
+                      : entry.data.kind.toUpperCase()}
+                  </span>
+
+                  <span class="cover-letter">
+                    {placeholderLetter(entry)}
+                  </span>
+                </a>
+
+                <div class="entry-content">
+
+                  <div class="entry-topline">
+                    <span>
+                      {archiveNumber(entry)
+                        ? `${entry.data.kind.toUpperCase()} ${archiveNumber(entry)}`
+                        : entry.data.kind.toUpperCase()}
+                    </span>
+
+                    <StatusBadge status={entry.data.status} />
+                  </div>
+
+                  <h2>
+                    <a href={entryUrl(entry)}>
+                      {entry.data.title}
+                    </a>
+                  </h2>
+
+                  <p class="description">
+                    {entry.data.description}
+                  </p>
+
+                  <div class="meta">
+                    {entry.data.format && (
+                      <span>{entry.data.format}</span>
+                    )}
+
+                    {entry.data.artists.length > 0 && (
+                      <span>{entry.data.artists.join(', ')}</span>
+                    )}
+
+                    <span>{formatDate(entry.data.published)}</span>
+                  </div>
+
+                  {entry.data.topics.length > 0 && (
+                    <div class="topics">
+                      {entry.data.topics.slice(0, 4).map((topic) => (
+                        <span>{topic}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <a class="read-link" href={entryUrl(entry)}>
+                    OPEN →
+                  </a>
+
+                </div>
+              </article>
+            ))}
+          </section>
+        )}
+      </main>
+
+      <footer>
+        <span>AGENT SUPER FILES © {new Date().getFullYear()}</span>
+        <span>{title.toUpperCase()} INDEX</span>
+      </footer>
+
+    </div>
+  </body>
+</html>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: #e9eae6;
+    color: #161715;
+    font-family: 'IBM Plex Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .page {
+    max-width: 1580px;
+    margin: 0 auto;
+    padding: 0 clamp(18px, 3vw, 48px);
+  }
+
+  .topline {
+    min-height: 37px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #30312e;
+    font-size: 9px;
+    letter-spacing: .055em;
+  }
+
+  .topline span:last-child {
+    margin-left: auto;
+  }
+
+  .mark {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .site-header {
+    min-height: 74px;
+    border-bottom: 3px double #343531;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .site-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 39px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.01em;
+    text-decoration: none;
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 32px;
+    font: 700 17px 'Barlow Condensed', sans-serif;
+  }
+
+  nav a {
+    text-decoration: none;
+  }
+
+  nav a:hover,
+  nav a.active {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+
+  .archive-header {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) 140px;
+    gap: 28px;
+    align-items: end;
+    padding: clamp(40px, 6vw, 76px) 0 30px;
+    border-bottom: 1px solid #343531;
+  }
+
+  .section-number {
+    align-self: start;
+    padding-top: 8px;
+    font-size: 11px;
+    color: #c92318;
+  }
+
+  .archive-header h1 {
+    margin: 0;
+    font: 900 clamp(70px, 9vw, 140px)/.78 'Barlow Condensed', sans-serif;
+    letter-spacing: -.015em;
+    text-transform: uppercase;
+  }
+
+  .archive-header p {
+    max-width: 700px;
+    margin: 24px 0 0;
+    font: 400 23px/1.3 'Source Serif 4', Georgia, serif;
+  }
+
+  .count {
+    text-align: right;
+  }
+
+  .count span {
+    display: block;
+    font: 900 58px/.8 'Barlow Condensed', sans-serif;
+  }
+
+  .count small {
+    display: block;
+    margin-top: 10px;
+    font-size: 9px;
+    letter-spacing: .08em;
+  }
+
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-bottom: 1px solid #343531;
+  }
+
+  .entry-card {
+    display: grid;
+    grid-template-columns: minmax(160px, 34%) minmax(0, 1fr);
+    gap: 22px;
+    padding: 28px 0;
+    border-bottom: 1px solid #9d9f98;
+  }
+
+  .entry-card:nth-child(odd) {
+    padding-right: 28px;
+    border-right: 1px solid #9d9f98;
+  }
+
+  .entry-card:nth-child(even) {
+    padding-left: 28px;
+  }
+
+  .cover {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #20221f;
+    color: #e9eae6;
+    text-decoration: none;
+  }
+
+  .cover-meta {
+    position: absolute;
+    top: 13px;
+    left: 13px;
+    font-size: 9px;
+    letter-spacing: .05em;
+  }
+
+  .cover-letter {
+    position: absolute;
+    left: 50%;
+    bottom: -13%;
+    transform: translateX(-50%);
+    font: 900 clamp(140px, 16vw, 240px)/1 'Barlow Condensed', sans-serif;
+    letter-spacing: -.06em;
+  }
+
+  .entry-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .entry-topline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 22px;
+    font-size: 10px;
+  }
+
+  .entry-content h2 {
+    margin: 12px 0 10px;
+    font: 800 clamp(31px, 3vw, 47px)/.95 'Barlow Condensed', sans-serif;
+    letter-spacing: -.01em;
+  }
+
+  .entry-content h2 a {
+    text-decoration: none;
+  }
+
+  .entry-content h2 a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+  }
+
+  .description {
+    margin: 0 0 18px;
+    font: 400 16px/1.35 'Source Serif 4', Georgia, serif;
+    max-width: 520px;
+  }
+
+  .meta {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid #b6b7b1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 16px;
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+
+  .meta span:not(:last-child)::after {
+    content: " /";
+    color: #7a7c75;
+  }
+
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 13px;
+  }
+
+  .topics span {
+    border: 1px solid #9d9f98;
+    padding: 3px 6px;
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+
+  .read-link {
+    margin-top: 18px;
+    font-size: 10px;
+    text-underline-offset: 4px;
+  }
+
+  .empty {
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #343531;
+    font-size: 11px;
+  }
+
+  footer {
+    min-height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+  }
+
+  @media (max-width: 900px) {
+    .archive-header {
+      grid-template-columns: 55px minmax(0, 1fr);
+    }
+
+    .count {
+      display: none;
+    }
+
+    .entry-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .entry-card:nth-child(odd),
+    .entry-card:nth-child(even) {
+      padding: 24px 0;
+      border-right: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .topline span {
+      display: none;
+    }
+
+    .site-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 17px 0;
+    }
+
+    nav {
+      margin-left: 0;
+      width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .archive-header {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding-top: 32px;
+    }
+
+    .archive-header h1 {
+      font-size: clamp(64px, 22vw, 100px);
+    }
+
+    .archive-header p {
+      font-size: 19px;
+    }
+
+    .entry-card {
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .entry-content h2 {
+      font-size: 30px;
+    }
+
+    .description {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 440px) {
+    .entry-card {
+      grid-template-columns: 1fr;
+    }
+
+    .cover {
+      max-width: 180px;
+    }
+  }
+</style>
