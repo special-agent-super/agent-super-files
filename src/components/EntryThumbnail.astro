@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Props = {
+  entry: CollectionEntry<'entries'>;
+  compact?: boolean;
+};
+
+const { entry, compact = false } = Astro.props;
+const number = entry.data.fileNo === undefined ? '—' : String(entry.data.fileNo).padStart(4, '0');
+const kind = entry.data.kind === 'file' ? 'F' : entry.data.kind === 'note' ? 'N' : 'A';
+const creator = entry.data.artists[0] || entry.data.kind.toUpperCase();
+const cover = entry.data.cover;
+---
+<div class:list={['entry-thumbnail', { 'entry-thumbnail--compact': compact, 'entry-thumbnail--image': !!cover }]}>
+  <div class="entry-thumbnail__fallback" aria-hidden="true">
+    <div class="entry-thumbnail__top"><span>AGENT SUPER FILES</span><span>{kind} / {number}</span></div>
+    <span class="entry-thumbnail__letter">{kind}</span>
+    <div class="entry-thumbnail__bottom"><span>{creator}</span><span>ASF</span></div>
+  </div>
+  {cover && (
+    <img src={cover} alt={entry.data.coverAlt || ''} loading="lazy" decoding="async" width="320" height="320" data-entry-cover />
+  )}
+</div>
+<script>
+  // A missing local cover should reveal the underlying typographic placeholder.
+  document.querySelectorAll<HTMLImageElement>('img[data-entry-cover]').forEach((image) => {
+    const hideMissing = () => image.remove();
+    image.addEventListener('error', hideMissing, { once: true });
+    if (image.complete && image.naturalWidth === 0) hideMissing();
+  });
+</script>

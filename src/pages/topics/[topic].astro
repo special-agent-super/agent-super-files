@@ -1,4 +1,5 @@
 ---
+import '../../styles/editorial.css';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { slugify } from '../../utils/slugs';
@@ -62,30 +63,35 @@ function archiveNumber(entry: CollectionEntry<'entries'>) {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{topic} — Agent Super Files</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet" />
   </head>
-
   <body>
-    <main>
-      <p>TOPIC</p>
-      <h1>{topic}</h1>
-
-      <p>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</p>
-
-      <ul>
-        {entries.map((entry) => (
-          <li>
-            {entry.data.kind.toUpperCase()}
-            {' '}
-            <a href={entryUrl(entry)}>
-              {archiveNumber(entry) && `${archiveNumber(entry)} · `}
-              {entry.data.title}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div class="taxonomy-page">
+      <div class="topline"><a href="/" class="mark">ASF</a><span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span></div>
+      <header class="site-header">
+        <a href="/" class="site-title">Agent Super Files</a>
+        <nav aria-label="Main navigation"><a href="/files/">FILES</a><a href="/notes/">NOTES</a><a href="/artifacts/">ARTIFACTS</a></nav>
+      </header>
+      <main>
+        <header class="taxonomy-heading">
+          <small>TOPIC INDEX</small>
+          <h1>{topic}</h1>
+          <p>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</p>
+        </header>
+        <ul>
+          {entries.map((entry) => (
+            <li>
+              <span>{entry.data.kind.toUpperCase()} {archiveNumber(entry)}</span>
+              <a href={entryUrl(entry)}>{entry.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <footer><span>AGENT SUPER FILES © {new Date().getFullYear()}</span><a href="/">INDEX</a></footer>
+    </div>
   </body>
 </html>

@@ -33,7 +33,7 @@ related:
   - tiga-solyanka-2011
 
 featured: true
-draft: false
+draft: true
 ---
 
 # The Rejected Top Secret Mix

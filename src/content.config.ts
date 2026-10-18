@@ -23,6 +23,11 @@ const entries = defineCollection({
 
     description: z.string(),
 
+    // Optional square image used in archive listings and featured files.
+    // Use a public URL path, e.g. /images/artist/release-cover.jpg.
+    cover: z.string().optional(),
+    coverAlt: z.string().optional(),
+
     published: z.coerce.date(),
     updated: z.coerce.date().optional(),
 
