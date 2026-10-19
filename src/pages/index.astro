@@ -8,8 +8,8 @@ import EntryThumbnail from '../components/EntryThumbnail.astro';
 type Entry = CollectionEntry<'entries'>;
 const entries = await getCollection('entries', ({ data }) => !data.draft);
 const latest = [...entries].sort((a, b) => b.data.published.getTime() - a.data.published.getTime()).slice(0, 8);
-const featured = entries.filter(e => e.data.kind === 'file' && e.data.featured)
-  .sort((a, b) => (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0));
+const featured = entries.filter(e => e.data.featured)
+  .sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
 const featuredIds = new Set(featured.slice(0, 2).map(e => e.id));
 const open = entries.filter(e => e.data.kind === 'file' && e.data.status === 'open' && !featuredIds.has(e.id))
   .sort((a, b) => (b.data.fileNo ?? 0) - (a.data.fileNo ?? 0));
@@ -29,7 +29,7 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research." />
+    <meta name="description" content="An irregular archive of electronic & indie music, lost recordings, obscure releases and unnecessary research." />
     <title>Agent Super Files — An Irregular Archive of Electronic Music</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,7 +53,7 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
       <main>
         <div class="lead-grid">
           <section class="section featured" aria-labelledby="featured-heading">
-            <div class="section-head"><span class="section-no">01</span><h2 id="featured-heading">Featured files</h2><p>IN-DEPTH RESEARCH, LOST RECORDINGS<br />AND OTHER CURIOSITIES.</p></div>
+            <div class="section-head"><span class="section-no">01</span><h2 id="featured-heading">Featured</h2><p>IN-DEPTH RESEARCH, LOST RECORDINGS<br />AND OTHER CURIOSITIES.</p></div>
             {featured.length ? (
               <div class="featured-list">
                 {featured.slice(0, 2).map(e => (
