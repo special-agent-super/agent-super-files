@@ -37,23 +37,21 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
   </head>
   <body>
     <div class="page" id="top">
-      <div class="topline"><a href="/" class="mark">ASF</a><span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span><span>LOST RECORDINGS / OBSCURE RELEASES / UNNECESSARY RESEARCH</span></div>
+      <div class="topline"><a href="/" class="mark">ASF</a><span class="genres">INDIE SLEAZE / BLOGHOUSE / NU-RAVE / ELECTROCLASH / BIG BEAT</span></div>
       <header class="masthead">
         <div class="identity">
           <a href="/" class="site-title">Agent Super Files</a>
           <p>An irregular archive of electronic music, lost recordings, obscure releases and unnecessary research.</p>
         </div>
-        <div class="header-note">PERSONAL ARCHIVE<br />EST. 2026</div>
       </header>
       <nav class="nav" aria-label="Main navigation">
         <a href="/files/">FILES</a><a href="/notes/">NOTES</a><a href="/artifacts/">ARTIFACTS</a>
         <a href="#archive">BROWSE</a><a href="#latest">LATEST</a>
-        <span class="nav-end">INDEX / ASF</span>
       </nav>
       <main>
         <div class="lead-grid">
           <section class="section featured" aria-labelledby="featured-heading">
-            <div class="section-head"><span class="section-no">01</span><h2 id="featured-heading">Featured</h2><p>IN-DEPTH RESEARCH, LOST RECORDINGS<br />AND OTHER CURIOSITIES.</p></div>
+            <div class="section-head"><h2 id="featured-heading">Featured</h2></div>
             {featured.length ? (
               <div class="featured-list">
                 {featured.slice(0, 2).map(e => (
@@ -72,7 +70,7 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
             ) : <p class="empty">NO FEATURED FILES YET.</p>}
           </section>
           {open.length > 0 && <section class="section cases" aria-labelledby="cases-heading">
-            <div class="section-head"><span class="section-no">02</span><h2 id="cases-heading">Open cases</h2><p>ONGOING RESEARCH AND<br />UNANSWERED QUESTIONS.</p></div>
+            <div class="section-head"><h2 id="cases-heading">Open cases</h2></div>
             {open.length ? (
               <div class="case-grid">
                 {open.slice(0, 4).map(e => (
@@ -86,7 +84,7 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
           </section>}
         </div>
         <section class="section latest" id="latest" aria-labelledby="latest-heading">
-          <div class="section-head"><span class="section-no">03</span><h2 id="latest-heading">Latest additions</h2><p>NEWLY ADDED TO THE ARCHIVE.</p><a class="section-more" href="#archive">BROWSE ALL ↗</a></div>
+          <div class="section-head"><h2 id="latest-heading">Latest additions</h2></div>
           {latest.length ? (
             <div class="table-wrap"><table><thead><tr><th scope="col">#</th><th scope="col">TITLE</th><th scope="col">TYPE</th><th scope="col">ARTIST / CREATOR</th><th scope="col">TOPICS</th><th scope="col">DATE</th><th scope="col"></th></tr></thead><tbody>
               {latest.map(e => (<tr><td class="mono">{number(e) || '—'}</td><td><a class="entry-title" href={url(e)}>{e.data.title}</a></td><td>{e.data.kind}</td><td>{e.data.artists.join(', ') || '—'}</td><td>{e.data.topics.slice(0, 2).join(' / ') || '—'}</td><td class="mono">{date(e.data.published)}</td><td><a href={url(e)} aria-label={`Read ${e.data.title}`}>↗</a></td></tr>))}
@@ -94,15 +92,15 @@ const label = (e: Entry) => `${e.data.kind.toUpperCase()}${number(e) ? ' ' + num
           ) : <p class="empty">NO ENTRIES YET.</p>}
         </section>
         <section class="section browse" id="archive" aria-labelledby="browse-heading">
-          <div class="section-head"><span class="section-no">04</span><h2 id="browse-heading">Browse the archive</h2><p>EXPLORE BY ENTRY TYPE.</p></div>
+          <div class="section-head"><h2 id="browse-heading">Browse the archive</h2></div>
           <div class="browse-grid">
-            <a href="/files/" class="browse-card"><div class="browse-bottom"><h3>FILES</h3><span>{counts.files}</span></div><p>Investigations, histories, mixes and long reads.</p><div class="browse-link">EXPLORE FILES ↗</div></a>
-            <a href="/notes/" class="browse-card"><div class="browse-bottom"><h3>NOTES</h3><span>{counts.notes}</span></div><p>Observations, fragments and unfinished thoughts.</p><div class="browse-link">EXPLORE NOTES ↗</div></a>
-            <a href="/artifacts/" class="browse-card"><div class="browse-bottom"><h3>ARTIFACTS</h3><span>{counts.artifacts}</span></div><p>Scans, ephemera, recordings and physical evidence.</p><div class="browse-link">EXPLORE ARTIFACTS ↗</div></a>
+            <a href="/files/" class="browse-card"><div class="browse-bottom"><h3>FILES</h3><span>{counts.files}</span></div><p>Investigations, histories, mixes and long reads.</p></a>
+            <a href="/notes/" class="browse-card"><div class="browse-bottom"><h3>NOTES</h3><span>{counts.notes}</span></div><p>Observations, fragments and unfinished thoughts.</p></a>
+            <a href="/artifacts/" class="browse-card"><div class="browse-bottom"><h3>ARTIFACTS</h3><span>{counts.artifacts}</span></div><p>Scans, ephemera, recordings and physical evidence.</p></a>
           </div>
         </section>
       </main>
-      <footer><span>AGENT SUPER FILES © {new Date().getFullYear()}</span><span>AN IRREGULAR ARCHIVE OF ELECTRONIC MUSIC.</span><a href="#top" >BACK TO TOP ↑</a></footer>
+      <footer><span>AGENT SUPER FILES © {new Date().getFullYear()}</span><a href="#top">BACK TO TOP ↑</a></footer>
     </div>
   </body>
 </html>
